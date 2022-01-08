@@ -1,0 +1,17 @@
+{
+  "name": "com.matty.unity.ui.switch",
+  "version": "0.1.0",
+  "displayName": "UI Switch button",
+  "description": "A switch button, using Unity's Toggle component.",
+  "unity": "2021.1",
+  "keywords": [
+    "ui",
+    "switch",
+    "toggle"
+  ],
+  "author": {
+    "name": "Matty",
+    "email": "mattygroothuis@gmail.com"
+  },
+  "type": "library"
+}
