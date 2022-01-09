@@ -1,9 +1,15 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace Matty.Unity.UI {
     [RequireComponent(typeof(Toggle))]
     public class Switch : MonoBehaviour {
+        [Header("General settings")]
+        [SerializeField] private float switchDuration = 0.15f;
+        [SerializeField] private float crossFadeDuration = 0.15f;
+        [SerializeField] private AnimationCurve animationCurve;
+
         [Header("Bar settings")]
         [SerializeField] private RectTransform bar;
 
@@ -19,6 +25,9 @@ namespace Matty.Unity.UI {
         private Toggle toggle;
         private Image barImage;
         private Image handleImage;
+
+        private int previousAnchorValue;
+        private int targetAnchorValue;
 
         private void Awake() {
             if (this.bar != null) {
@@ -38,16 +47,41 @@ namespace Matty.Unity.UI {
         }
 
         private void OnSwitch(bool value) {
-            int valueAsInt = value ? 1 : 0;
+            this.previousAnchorValue = value ? 0 : 1;
+            this.targetAnchorValue = value ? 1 : 0;
 
-            // Flip position
-            this.handle.anchorMin = new Vector2(valueAsInt, 0.5f);
-            this.handle.anchorMax = new Vector2(valueAsInt, 0.5f);
-            this.handle.pivot = new Vector2(valueAsInt, 0.5f);
+            this.StartCoroutine(this.SwitchHandle());
 
             // Set color
-            this.barImage.color = value ? this.barColorOn : this.barColorOff;
-            this.handleImage.color = value ? this.handleColorOn : this.handleColorOff;
+            this.barImage.CrossFadeColor(value ? this.barColorOn : this.barColorOff, this.crossFadeDuration, false, true);
+            this.handleImage.CrossFadeColor(value ? this.handleColorOn : this.handleColorOff, this.crossFadeDuration, false, true);
+        }
+
+        private IEnumerator SwitchHandle() {
+            float curAnchorValue;
+            float timeElapsed = 0;
+
+            while (timeElapsed < this.switchDuration) {
+                float progress = this.animationCurve.Evaluate(timeElapsed / this.switchDuration);
+
+                curAnchorValue = Mathf.Lerp(this.previousAnchorValue, this.targetAnchorValue, progress);
+
+                this.UpdateHandlePosition(curAnchorValue);
+
+                timeElapsed += Time.deltaTime;
+
+                yield return null;
+            }
+
+            curAnchorValue = this.targetAnchorValue;
+
+            this.UpdateHandlePosition(curAnchorValue);
+        }
+
+        private void UpdateHandlePosition(float value) {
+            this.handle.anchorMin = new Vector2(value, 0.5f);
+            this.handle.anchorMax = new Vector2(value, 0.5f);
+            this.handle.pivot = new Vector2(value, 0.5f);
         }
     }
 }
